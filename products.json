@@ -1,0 +1,52 @@
+[
+    {
+        "name": "Apple iPhone 14 (128GB) - Midnight",
+        "url": "https://www.amazon.in/Apple-iPhone-14-128GB-Midnight/dp/B0BDHX8Z63",
+        "target_price": 55000.0
+    },
+    {
+        "name": "Apple iPhone 15 (128GB) - Black",
+        "url": "https://www.amazon.in/Apple-iPhone-15-128GB-Black/dp/B0CHX1W1XY",
+        "target_price": 65000.0
+    },
+    {
+        "name": "Apple iPhone 13 (256GB) - Starlight",
+        "url": "https://www.amazon.in/Apple-iPhone-13-256GB-Starlight/dp/B09G9D8KRQ",
+        "target_price": 60000.0
+    },
+    {
+        "name": "Apple iPhone 14 Plus (128GB) - Blue",
+        "url": "https://www.amazon.in/Apple-iPhone-14-Plus-128GB/dp/B0BDJ684WG",
+        "target_price": 65000.0
+    },
+    {
+        "name": "Apple iPhone 15 Plus (128GB) - Pink",
+        "url": "https://www.amazon.in/Apple-iPhone-15-Plus-128GB/dp/B0CHWWBY5R",
+        "target_price": 80000.0
+    },
+    {
+        "name": "Apple AirPods Pro (2nd Generation)",
+        "url": "https://www.amazon.in/Apple-AirPods-Pro-2nd-Generation/dp/B0CHXNPK5G",
+        "target_price": 18000.0
+    },
+    {
+        "name": "Apple Watch Series 9 (41mm)",
+        "url": "https://www.amazon.in/Apple-Watch-Series-Smartwatch-Midnight/dp/B0CHX5T466",
+        "target_price": 35000.0
+    },
+    {
+        "name": "Apple iPad Air (5th Generation)",
+        "url": "https://www.amazon.in/Apple-iPad-Air-10-9-inch-27-69/dp/B09V4FNFHN",
+        "target_price": 50000.0
+    },
+    {
+        "name": "Apple MacBook Air M1",
+        "url": "https://www.amazon.in/Apple-MacBook-Chip-13-inch-256GB/dp/B08N5W4NNB",
+        "target_price": 70000.0
+    },
+    {
+        "name": "Sony Wi-Xb400 Headphones Wireless Neck-Band Calls/Music USB, W128298864 (Neck-Band Calls/Music USB Type-C Bluetooth Black)",
+        "url": "https://www.amazon.in/Sony-Headphones-Neck-Band-W128298864-Bluetooth/dp/B07X1TDTQB/?_encoding=UTF8&pd_rd_w=bO0qv&content-id=amzn1.sym.e1111eab-23fc-4988-aab5-fa55f0b13433&pf_rd_p=e1111eab-23fc-4988-aab5-fa55f0b13433&pf_rd_r=FXCH4QC70M2F1TWF5VV7&pd_rd_wg=lclWG&pd_rd_r=1d08b1e0-cf59-4734-80bf-6b5dfdddbd3b&ref_=pd_hp_d_btf_ls_gwc_pc_en2_",
+        "target_price": 9000.0
+    }
+]

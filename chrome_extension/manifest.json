@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "Pulse Price Tracker",
+    "description": "Track Amazon product prices with one click. Sends the current page URL to your Pulse dashboard.",
+    "version": "1.0",
+    "permissions": ["activeTab"],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Track this product"
+    },
+    "icons": {
+        "48": "icon48.png",
+        "128": "icon128.png"
+    }
+}

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse | Price Tracker</title>
+    <!-- Google Fonts for Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="header-top">
+                <span class="user-greeting">👋 Hi, <strong>{{ username }}</strong></span>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </div>
+            <h1><span class="gradient-text">Pulse</span> Price Tracker</h1>
+            <p>Real-time market insights. Track your favorite products beautifully.</p>
+        </header>
+
+        <main>
+            <div class="add-product-form">
+                <input type="text" id="newUrl" placeholder="Paste Amazon URL here..." required>
+                <input type="number" id="newTargetPrice" placeholder="Target Price (₹)" required>
+                <button onclick="addProduct()" class="add-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+                    </svg>
+                    Track Output
+                </button>
+            </div>
+
+            <div class="chart-wrapper">
+                <canvas id="priceChart"></canvas>
+            </div>
+            
+            <div class="controls">
+                <button onclick="fetchData()" class="refresh-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                    </svg>
+                    Refresh Data
+                </button>
+            </div>
+
+            <div class="products-section">
+                <h2>Tracked Products <span id="productCount" class="badge">0</span></h2>
+                <div class="products-table-wrapper">
+                    <table class="products-table" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Product Name</th>
+                                <th>Target Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let priceChart;
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} toast-show`;
+            setTimeout(() => { toast.className = 'toast'; }, 3500);
+        }
+
+        async function addProduct() {
+            const urlInput = document.getElementById('newUrl');
+            const priceInput = document.getElementById('newTargetPrice');
+            const url = urlInput.value.trim();
+            const targetPrice = priceInput.value.trim();
+
+            if (!url || !targetPrice) {
+                showToast('Please fill in both fields.', 'error');
+                return;
+            }
+
+            const btn = document.querySelector('.add-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Adding...';
+
+            try {
+                const response = await fetch('/api/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, target_price: targetPrice })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast(`Now tracking: ${data.product.name}`, 'success');
+                    urlInput.value = '';
+                    priceInput.value = '';
+                    fetchData();
+                    loadProducts();
+                } else {
+                    showToast(data.error || 'Failed to add product.', 'error');
+                }
+            } catch (err) {
+                showToast('Server error. Is app.py running?', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg> Track Product`;
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+                const tbody = document.getElementById('productsBody');
+                document.getElementById('productCount').textContent = products.length;
+
+                if (products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No products tracked yet. Paste a URL above to start!</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = products.map((p, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td><a href="${p.url}" target="_blank" class="product-link">${p.name}</a></td>
+                        <td>₹${Number(p.target_price).toLocaleString('en-IN')}</td>
+                        <td><button class="remove-btn" onclick="removeProduct('${p.url.replace(/'/g, "\\'")}')">✕</button></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Error loading products:', err);
+            }
+        }
+
+        async function removeProduct(url) {
+            if (!confirm('Remove this product from tracking?')) return;
+            try {
+                const response = await fetch('/api/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+                if (response.ok) {
+                    showToast('Product removed.', 'success');
+                    loadProducts();
+                } else {
+                    showToast('Failed to remove product.', 'error');
+                }
+            } catch (err) {
+                showToast('Server error.', 'error');
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const btnSvg = document.querySelector('.refresh-btn svg');
+                btnSvg.style.transform = `rotate(${Math.random() * 360 + 360}deg)`;
+                
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                
+                renderChart(data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            if (priceChart) {
+                priceChart.data = data;
+                priceChart.update();
+                return;
+            }
+
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = "'Outfit', sans-serif";
+            Chart.defaults.font.size = 13;
+
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 25,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 14,
+                            boxPadding: 8,
+                            usePointStyle: true,
+                            cornerRadius: 12,
+                            titleFont: { size: 14, weight: '600', family: "'Outfit', sans-serif" },
+                            bodyFont: { size: 13, family: "'Outfit', sans-serif" }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+                            ticks: { display: false }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false, borderDash: [5, 5] },
+                            ticks: {
+                                callback: function(value) { return '₹' + value.toLocaleString('en-IN'); },
+                                padding: 10
+                            },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial fetch
+        fetchData();
+        loadProducts();
+        // Auto refresh every 3 minutes
+        setInterval(fetchData, 180000);
+        setInterval(loadProducts, 180000);
+    </script>
+</body>
+</html>
