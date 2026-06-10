@@ -87,6 +87,4 @@ It will use `pulse.db` from the project root and check tracked products in inter
 
 The `chrome_extension/` folder contains a simple extension manifest and popup UI that can be adapted to integrate with the tracker.
 
-## License
 
-This project does not include a license file. Add one if you want to make usage terms explicit.
